@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <link rel="stylesheet" href="/static/style.css">
+        <style>
+            @import url('https://fonts.googleapis.com/css2?family=Raleway:ital,wght@0,400;0,500;0,600;1,300;1,400;1,500&display=swap');
+            </style>            
+    </head>
+    <body>
+        <h3 id = "grad1">THE MOVIE DB</h3>
+    <div id="full-div">
+        <div class="navigation">
+            <div class="tablinks" id="home" onclick="openHome()">
+                Home &nbsp; &nbsp; &#10230;
+            </div>
+            <br><br>
+            <div class="tablinks" id="search" onclick="openSearch();">
+                Search &nbsp; &nbsp; &#10230;
+            </div>    
+        </div>
+        <div class="vl"></div>
+    
+        <div id="home-content" class="content">
+
+            <div id="trending-text">
+                <p>Trending Movies</p>                     
+            </div>
+
+            <div class="slideshow-container"></div>
+                    <br><br>
+                <div id="airing-text">
+                    <p style="text-align: center;">TV Shows On-Air Today</p> 
+                </div>      
+                <div class="slideshow-container-airing"></div>
+            </div> <br><br>            
+            
+            <!-- <div style="width: 100%;height: 45px;background-color: #800000;margin-top: 125px;">
+            <p align="right" style="font-family: arial; font-size: 12px;margin-right: 10px;padding-top: 10px;">
+            <i>Designed and developed by Kranthi <br> Powered by TMDB</i>
+            </p>  
+            </div> -->
+        </div>
+    
+         <div id="search-content" class="content">
+            <div class="searching">
+                <h3 style="color: white; margin-left: 42%;">Search</h3>
+
+                <label class= "required" for="keyword">Keyword</label>
+                <input type="text" id="keyword" name="keyword"><br><br>
+                <label class = "required" for="category">Category</label>
+                    <select id="category" name="category">
+                        <option disabled selected value></option>
+                        <option value="movies">Movies</option>
+                        <option value="show">TV Shows</option>
+                        <option value="both">Movies and TV Shows</option>
+                    </select>
+                    <br><br>
+                <input type="submit" id="submit" onclick="submitFunction()" value="Search"/>
+                <input type="submit" id="clear" onclick="clearFunction()" value="Clear"/>
+                <!-- <div style="width: 100%;height: 45px;background-color: #800000;margin-top: 125px;">
+                    <p align="right" style="font-family: arial; font-size: 12px;margin-right: 10px;padding-top: 10px;">
+                    <i>Designed and developed by Kranthi <br> Powered by TMDB</i>
+                    </p>  
+                    </div> -->
+            </div>
+            
+            <div id="no-value"></div>
+            <div id="card"></div>
+            <!-- The Modal -->
+                <div id="myModal" class="modal">
+
+                <!-- Modal content -->
+                    <div class="modal-content">
+                        <span class="close">&times;</span>
+                        <div id="content"></div>
+                        <div id="cast"></div>
+                        <div id="reviews_content"></div>
+                    </div>
+
+                </div>
+  
+        </div>
+            
+        </div>
+                           
+        <!-- </div>  -->
+    </div>
+    <!-- JavaScript starts here -->
+    <script>
+        
+        window.onload = openShow;
+        function openShow(){
+            startSlides();
+            startSlides2();
+        }
+
+        function startSlides(){
+            var xhttp = new XMLHttpRequest();
+            xhttp.open("GET", "/trending", false);
+            xhttp.send();
+            var trending = JSON.parse(xhttp.responseText);
+            var count=Object.keys(trending).length;
+            var date = new Date(trending[0].release_date)
+            var n = date.getFullYear()
+            var slides=document.getElementsByClassName("slideshow-container")[0];
+            for(i=0;i<count;i++)
+            {
+                slides.innerHTML += "<div class='mySlides fade'><img src='" + trending[i].backdrop_path + "' style='width:100%''><div class='text'>" + trending[i].title + "&nbsp;("+n +")</div></div>";
+            }
+            showSlides();
+            }
+
+        // Function to air trending movies
+        var slideIndex = 0;
+        function showSlides() {
+            var i;
+            var slides = document.getElementsByClassName("mySlides");
+            for (i = 0; i < slides.length; i++) {
+                slides[i].style.display = "none";  
+            }
+            slideIndex++;
+            if (slideIndex > slides.length) {slideIndex = 1}    
+            slides[slideIndex-1].style.display = "block";  
+            setTimeout(showSlides, 4000); // Change image every 2 seconds
+        }
+
+        function startSlides2(){
+            var xhttp = new XMLHttpRequest();
+            xhttp.open("GET", "/airing", false);
+            xhttp.send();
+            var airing = JSON.parse(xhttp.responseText);
+            var value=Object.keys(airing).length;
+            var date_val = new Date(airing[0].first_air_date)
+            var d = date_val.getFullYear()
+            var slide=document.getElementsByClassName("slideshow-container-airing")[0];
+            for(i=0;i<value;i++)
+            {
+                slide.innerHTML += "<div class='mySlideshow fade'><img src='" + airing[i].poster_path + "' style='width:100%;'><div class='text-val'>" + airing[i].name + "&nbsp;("+ d +")</div></div>";
+            }
+            showSlides2();
+        }
+
+        var slideIndex_val = 0;
+        function showSlides2() {
+            var i;
+            var slide = document.getElementsByClassName("mySlideshow");
+            for (i = 0; i < slide.length; i++) {
+                slide[i].style.display = "none";  
+            }
+            slideIndex_val++;
+            if (slideIndex_val > slide.length) {slideIndex_val = 1}    
+            slide[slideIndex_val-1].style.display = "block";  
+            setTimeout(showSlides2, 4000); // Change image every 2 seconds
+        }
+        
+
+        // opens home page by default
+        document.getElementById("home").click();
+
+        function openHome(){
+            document.getElementById('search-content').style.display = 'none';
+            document.getElementById('home-content').style.display = 'block';
+            document.getElementById('home').style.color = 'red';
+            document.getElementById('search').style.color = 'white';
+            document.getElementById('home').style.borderBottom = "1px solid white";
+            document.getElementById('search').style.borderBottom = "none";
+
+        }
+        function openSearch(){
+            document.getElementById('home-content').style.display = 'none';
+            document.getElementById('search-content').style.display = 'block';
+            document.getElementById('search').style.color = 'red';
+            document.getElementById('home').style.color = 'white';
+            document.getElementById('home').style.borderBottom = "none";
+            document.getElementById('search').style.borderBottom = "1px solid white";
+        }
+
+
+        var modal = document.getElementById("myModal");
+        var span = document.getElementsByClassName("close")[0];
+        // Modal function creation
+        function show_button(category_name,id) 
+        {
+            var xhr = new XMLHttpRequest();
+            modal.style.display = "block";
+            url="showMore?id="+id+"&category_name="+category_name;
+            var data = xhr.open('GET', url, false);
+            xhr.send();
+            data=JSON.parse(xhr.responseText);
+            // console.log(data)
+            
+
+            if(category_name == "movie")
+            {
+                movie_content=data['0'];
+                movie_cast=data['1'];
+                movie_reviews=data['2'];
+                // console.log(movie_content)
+                console.log(movie_cast)
+                console.log(movie_reviews)
+                var cast_count = Object.keys(movie_cast).length;
+                var review_count = Object.keys(movie_reviews).length;
+
+                document.getElementById("content").innerHTML='<img id ="ShowMore_movie_img" src='+movie_content['backdrop_path']+'></img> <br><p style=\"font-size:17px;margin-left:8px;display:inline;color:black;\"><b>'+movie_content['title']+'</b></p><p style="display:inline;margin-left: 0px;"> <a target="_blank" style="text-decoration:none; color:#cc0000;" href="https://www.themoviedb.org/movie/'+movie_content['id']+'" >&#9432;</a></p><p style=\"margin-left:15px;font-size:13px;color:black;\">'+movie_content['release_date']+' | '+movie_content['genres']+'</p><p style="font-size:11px;color:#cc0000;margin-left:15px;font-family:Georgia,Sans-serif;display:inline;">&#9733;'+movie_content['vote_average']+'/5 </p><p style=\"font-size:11px;font-family:Georgia,serif;display:inline;color:black;margin-left: 0px;\" >'+movie_content['vote_count']+' votes</p><p style="font-size:13px;margin-left:15px;color: black;">'+movie_content['overview']+'</p><p id="spokenLanguages">Spoken Languages: '+ movie_content['spoken_languages']+'</p>';
+
+                //for cast
+                if (cast_count == 0)
+                {
+                    document.getElementById("cast").innerHTML='<p id="castWord">Cast</p><p id="castEmpty">N/A</p><div id="showCastRow"></div>';
+                }
+                else{
+                    document.getElementById("cast").innerHTML='<p id="castWord">Cast</p><div id="movieCastRow"></div>';
+                    for (i = 0; i < cast_count; i++) 
+                        {
+                            document.getElementById("cast").innerHTML+='<div id="individualCast"><img id ="castImage" src='+movie_cast[i].profile_path+'></img><br><p id="nameText" align="center">'+movie_cast[i]['name']+'</p><p id ="characterText">AS<br>'+movie_cast[i]['character']+'</p></div>';
+
+                        }
+                }
+                //for reviews
+                if (review_count == 0)
+                {
+                    document.getElementById("reviews_content").innerHTML='<p id="reviewsText">Reviews</p><p id="castEmpty">N/A</p>';
+                }
+                else
+                {
+                    document.getElementById("reviews_content").innerHTML='<p id="reviewsText">Reviews</p>';
+                    for (i = 0; i < review_count; i++) 
+                    {
+                        if(movie_reviews[i]['rating']!=null)
+                        {
+
+                            movie_reviews[i]['rating']=movie_reviews[i]['rating']/2;
+
+                            document.getElementById("reviews_content").innerHTML+='<div id="individualReview"><p style="margin-left:0px;font-size:12px;font-weight:900;display:inline;color:black;">'+movie_reviews[i]['username']+'</p><p style="font-size:11px;display:inline;margin: 0px;color:black;"> on '+movie_reviews[i]['created_at']+'</p><p style="font-size:12px;color:#cc0000;margin-bottom:-10px;margin: 0px;">&#9733;'+movie_reviews[i]['rating']+'/5</p><div style="color:black;" id="reviewContentText">'+movie_reviews[i]['content']+'</div><hr style="width:600px;align:center;color:#cccccc;"></div>';
+
+                        }
+                        else {
+                            document.getElementById("reviews_content").innerHTML+='<div id="individualReview"><p style="margin-left:0px;font-size:12px;font-weight:900;display:inline;color:black;">'+movie_reviews[i]['username']+'</p><p style="font-size:11px;display:inline;margin: 0px;color:black;"> on '+movie_reviews[i]['created_at']+'</p><div     style="color:black;" id="reviewContentText">'+movie_reviews[i]['content']+'</div><hr style="width:600px;align:center;color:#cccccc;"></div>';
+                        }
+                    }
+                }
+
+
+            }
+
+
+            else if(category_name == "show")
+            {
+                show_content=data['0'];
+                show_cast=data['1'];
+                show_reviews=data['2'];
+                // console.log(show_cast)
+                // console.log(show_reviews)
+                var show_cast_count = Object.keys(show_cast).length;
+                var show_review_count = Object.keys(show_reviews).length;
+
+                document.getElementById("content").innerHTML='<img id ="ShowMore_show_img" src='+show_content['backdrop_path']+'></img> <br><p style=\"font-size:17px;margin-left:8px;display:inline;color:black;\"><b>'+show_content['name']+'</b></p><p style="display:inline;margin-left: 0px;"> <a target="_blank" style="text-decoration:none; color:#cc0000;" href="https://www.themoviedb.org/tv/'+show_content['id']+'" >&#9432;</a></p><p style=\"margin-left:15px;font-size:13px;color:black;\">'+show_content['first_air_date']+' | '+show_content['genres']+'</p><p style="font-size:11px;color:#cc0000;margin-left:15px;display:inline;">&#9733;'+show_content['vote_average']+'/5 </p><p style=\"font-size:11px;display:inline;color:black;margin-left: 0px;\" >'+show_content['vote_count']+' votes</p><p style="font-size:13px;margin-left:15px;color: black;">'+show_content['overview']+'</p><p id="spokenLanguages">Spoken Languages: '+show_content['spoken_languages']+'</p>';
+                document.getElementById("cast").innerHTML='<p id="castWord">Cast</p><div id="showCastRow"></div>';
+                //for cast
+                if (show_cast_count == 0)
+                {
+                    document.getElementById("cast").innerHTML='<p id="castWord">Cast</p><p id="castEmpty">N/A</p><div id="showCastRow"></div>';
+                }
+                else{
+                    document.getElementById("cast").innerHTML='<p id="castWord">Cast</p><div id="showCastRow"></div>';
+                    for (i = 0; i < show_cast_count; i++) 
+                    {
+                        document.getElementById("cast").innerHTML+='<div id="individualCast"><img id ="castImage" src='+show_cast[i].profile_path+'></img><br><p id="nameText" align="center">'+show_cast[i]['name']+'</p><p id ="characterText">AS<br>'+show_cast[i]['character']+'</p></div>';
+
+                    }
+                }
+                
+
+
+                //for reviews
+                if (show_review_count == 0)
+                {
+                    document.getElementById("reviews_content").innerHTML='<p id="reviewsText">Reviews</p><p id="castEmpty">N/A</p>';
+                }
+                else
+                {
+                    document.getElementById("reviews_content").innerHTML='<p id="reviewsText">Reviews</p>';
+                    for (i = 0; i < show_review_count; i++) 
+                    {
+                        if(show_reviews[i]['rating']!=null)
+                        {
+
+                            show_reviews[i]['rating']=show_reviews[i]['rating']/2;
+
+                            document.getElementById("reviews_content").innerHTML+='<div id="individualReview"><p style="margin-left:0px;font-size:12px;font-weight:900;display:inline;color:black;">'+show_reviews[i]['username']+'</p><p style="font-size:11px;display:inline;margin: 0px;color:black;"> on '+show_reviews[i]['created_at']+'</p><p style="font-size:12px;color:#cc0000;margin-bottom:-10px;margin: 0px;">&#9733;'+show_reviews[i]['rating']+'/5</p><div style="color:black;" id="reviewContentText">'+show_reviews[i]['content']+'</div><hr style="width:600px;align:center;color:#cccccc;"></div>';
+
+                        }
+                        else {
+                            document.getElementById("reviews_content").innerHTML+='<div id="individualReview"><p style="margin-left:0px;font-size:12px;font-weight:900;display:inline;color:black;">'+show_reviews[i]['username']+'</p><p style="font-size:11px;display:inline;margin: 0px;color:black;"> on '+show_reviews[i]['created_at']+'</p><div     style="color:black;" id="reviewContentText">'+show_reviews[i]['content']+'</div><hr style="width:600px;align:center;color:#cccccc;"></div>';
+                        }
+                    }
+                }
+
+            }
+
+
+
+            //to close the modal
+            span.onclick = function() 
+            {
+                modal.style.display = "none";
+            }
+            
+        }
+
+
+        // Function when we press submit
+        function submitFunction()
+        {
+            var xhttp = new XMLHttpRequest();
+            var keyword = document.getElementById('keyword').value;
+            var category = document.getElementById('category').value;
+            
+            if(category == "" || keyword.trim() == "")
+            {
+                alert("Please enter valid values");
+            }
+            
+            else if (category == "movies")
+            {
+                xhttp.open("GET", "/search?keyword=" + keyword + "&category=" + category, false);
+                xhttp.send();
+                var output = JSON.parse(xhttp.responseText);
+                var count = Object.keys(output).length;
+                // console.log(output)
+                if (count == 0)
+                {
+                    document.getElementById("no-value").innerHTML = "No results found";
+                }
+                else
+                {
+                    document.getElementById("no-value").innerHTML = '<div id="results">Showing results...</div>';
+                    document.getElementById("card").innerHTML = "";
+
+                    // Card starts here 
+                    for (i = 0; i < count; i++) 
+                    {
+                        
+                        document.getElementById("card").innerHTML+='<div id="singleCard"><img id = "poster_path" src="'+output[i].poster_path+'"></img><br><div id="description"><h2 id = "cardTitle">'+output[i]['title']+'</h2><span id = "cardYear">'+output[i]['release_date']+' | '+output[i]['genre_ids']+'<br></span><span id = "cardVotes">★'+output[i]['vote_average']/2+'/5  <span id ="none_votes">'+output[i]['vote_count']+' votes</span></span><p id ="movieContent">'+output[i]['overview']+'</p><div id ="showMore"> <input type="submit" id="showMoreButton" value="Show more" onclick=\"show_button(\'movie\','+output[i]['id']+');" /></div></div></div><br><br>';
+
+                    }
+                    
+
+                }
+            
+            }
+            else if (category == "show")
+            {
+                xhttp.open("GET", "/search?keyword=" + keyword + "&category=" + category, false);
+                xhttp.send();
+                var output = JSON.parse(xhttp.responseText);
+                var count = Object.keys(output).length;
+                // console.log(count);
+                // console.log(output);
+                if (count == 0)
+                {
+                    document.getElementById("no-value").innerHTML = "No results found";
+                }
+                else
+                {
+                    document.getElementById("no-value").innerHTML = '<div id="results">Showing results...</div>';
+                    document.getElementById("card").innerHTML = "";
+
+                    // Card starts here 
+                    for (i = 0; i < count; i++) 
+                    {
+                        
+                        document.getElementById("card").innerHTML+='<div id="singleCard"><img id = "poster_path" src="'+output[i].poster_path+'"></img><br><div id="description"><h2 id = "cardTitle">'+output[i]['name']+'</h2><span id = "cardYear">'+output[i]['first_air_date']+' | '+output[i]['genre_ids']+'<br></span><span id = "cardVotes">★'+output[i]['vote_average']/2+'/5 <span id ="none_votes">'+output[i]['vote_count']+' votes</span></span><p id ="movieContent">'+output[i]['overview']+'</p><div id ="showMore"> <input type="submit" id="showMoreButton" value="Show more" onclick=\"show_button(\'show\','+output[i]['id']+');" /></div></div></div><br><br>';
+
+                    }
+                    
+
+                }
+
+            }
+            else
+            {
+                xhttp.open("GET", "/search?keyword=" + keyword + "&category=" + category, false);
+                xhttp.send();
+                var output_both = JSON.parse(xhttp.responseText);
+                var count_both = Object.keys(output_both).length;
+                // console.log(count_both);
+                // console.log(output_both);
+                if (count_both == 0)
+                {
+                    document.getElementById("no-value").innerHTML = "No results found";
+                }
+                else
+                {
+                    document.getElementById("no-value").innerHTML = '<div id="results">Showing results...</div>';
+                    document.getElementById("card").innerHTML = "";
+
+                    // Card starts here 
+                    for (i = 0; i < count_both; i++) 
+                    {
+                        if (output_both[i]['media_type'] == 'movie')
+                        {
+
+                            document.getElementById("card").innerHTML+='<div id="singleCard"><img id = "poster_path" src="'+output_both[i].poster_path+'"></img><br><div id="description"><h2 id = "cardTitle">'+output_both[i]['title']+'</h2><span id = "cardYear">'+output_both[i]['release_date']+' | '+output_both[i]['genre_ids']+'<br></span><span id = "cardVotes">★'+output_both[i]['vote_average']/2+'/5 <span id ="none_votes">'+output_both[i]['vote_count']+' votes</span></span><p id ="movieContent">'+output_both[i]['overview']+'</p><div id ="showMore"> <input type="submit" id="showMoreButton" value="Show more" onclick=\"show_button(\'movie\','+output_both[i]['id']+');" /></div></div></div><br><br>';
+
+                        }
+                        else
+                        {
+
+                            document.getElementById("card").innerHTML+='<div id="singleCard"><img id = "poster_path" src="'+output_both[i].poster_path+'"></img><br><div id="description"><h2 id = "cardTitle">'+output_both[i]['name']+'</h2><span id = "cardYear">'+output_both[i]['first_air_date']+' | '+output_both[i]['genre_ids']+'<br></span><span id = "cardVotes">★'+output_both[i]['vote_average']/2+'/5 <span id ="none_votes">'+output_both[i]['vote_count']+' votes</span></span><p id ="movieContent">'+output_both[i]['overview']+'</p><div id ="showMore"> <input type="submit" id="showMoreButton" value="Show more" onclick=\"show_button(\'show\','+output_both[i]['id']+');" /></div></div></div><br><br>';
+
+                        }
+                        
+                    }
+                }
+            }
+        
+        }
+
+        // Function to clear the entered data
+        function clearFunction()
+        {
+            document.getElementById("no-value").visibility = 'hidden';
+            document.getElementById("keyword").value = '';
+            document.getElementById("category").selectedIndex = 0;
+            document.getElementById("no-value").innerHTML = '';
+            document.getElementById("card").innerHTML = '';
+        }
+    </script>
+
+    <!-- JavaScript ends here -->
+
+    </body>
+</html>
